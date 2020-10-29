@@ -1,7 +1,9 @@
 # TrilioVault Example - Red Sky Experiment
 
 ## Introduction
-Protype based on 'Getting Started' guide - https://docs.trilio.io/kubernetes/use-triliovault/installing-triliovault
+Prototype Experiment - TrilioVault for Kubernetes - Performance Testing for Optimal Backup/Restore Duration Time
+
+based on 'Getting Started' guide - https://docs.trilio.io/kubernetes/use-triliovault/installing-triliovault
 
 # PREREQUISITES
 
@@ -56,4 +58,4 @@ kubectl create configmap backuptrial --from-file=trial-configmaps/backup.yaml
 
 ## Run the Experiment File
 
-kubectl apply -f experiment-free-tier.yaml
+kubectl apply -f experiment-simple-backup.yaml
