@@ -1,7 +1,7 @@
 apiVersion: redskyops.dev/v1alpha1
 kind: Experiment
 metadata:
-  name: triliovault-experiment
+  name: tvk-experiment-advanced
 spec:
   optimization:
   - name: "experimentBudget"
