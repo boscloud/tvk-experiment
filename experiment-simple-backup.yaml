@@ -1,0 +1,75 @@
+apiVersion: redskyops.dev/v1alpha1
+kind: Experiment
+metadata:
+  name: triliovault-experiment-base
+spec:
+  optimization:
+  - name: "experimentBudget"
+    value: "40"
+  parameters:
+  - name: controlplane_cpu
+    min: 1
+    max: 256
+  - name: controlplane_memory
+    min: 1
+    max: 256
+  metrics:
+  - name: duration
+    minimize: true
+    query: "{{duration .StartTime .CompletionTime}}"
+  - name: cost
+    minimize: true
+    type: pods
+    # Note that these cost weights are specific to GKE and represent $22/month/cpu and $3/month/GB
+    query: '{{resourceRequests .Pods "cpu=0.022,memory=0.000000000003"}}'
+    selector:
+      matchLabels:
+        app.kubernetes.io/name: k8s-triliovault
+  patches:
+  - targetRef:
+      kind: Deployment
+      apiVersion: apps/v1
+      name: k8s-triliovault-control-plane
+    patch: |
+      spec:
+        template:
+          spec:
+            containers:
+            - name: triliovault-control-plane
+              resources:
+                limits:
+                  cpu: "{{ .Values.controlplane_cpu }}m"
+                  memory: "{{ .Values.controlplane_memory }}Mi"
+                requests:
+                  cpu: "{{ .Values.controlplane_cpu }}m"
+                  memory: "{{ .Values.controlplane_memory }}Mi"                
+  template: # trial
+    spec:
+      ttlSecondsAfterFinished: 1800
+      setupServiceAccountName: redsky
+      template: # job
+        spec:
+          template: # pod
+            spec:
+              activeDeadlineSeconds: 1800
+              containers:
+              - image: bitnami/kubectl:latest
+                name: kubectl
+                command: ["/scripts/wrapper.sh"]
+                ports:
+                - name: kubectl
+                  containerPort: 2368
+                  protocol: TCP
+                volumeMounts:
+                  - name: wrapper
+                    mountPath: /scripts
+                  - name: backuptrial
+                    mountPath: /manifests
+              volumes:
+                - name: wrapper
+                  configMap:
+                    name: wrapper
+                    defaultMode: 0755
+                - name: backuptrial
+                  configMap:
+                    name: backuptrial    

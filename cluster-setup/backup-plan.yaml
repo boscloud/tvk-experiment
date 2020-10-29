@@ -1,0 +1,12 @@
+apiVersion: triliovault.trilio.io/v1
+kind: BackupPlan
+metadata:
+  name: cockroachdb-backup-plan
+spec:
+  backupNamespace: default
+  backupConfig:
+    target:
+      name: demo-s3-target
+  backupPlanComponents:
+    helmReleases:
+      - cockroachdb-app

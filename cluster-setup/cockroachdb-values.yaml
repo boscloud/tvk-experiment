@@ -1,0 +1,9 @@
+statefulset:
+  resources:
+    limits:
+      memory: "4Gi"
+    requests:
+      memory: "4Gi"
+conf:
+  cache: "1Gi"
+  max-sql-memory: "1Gi"

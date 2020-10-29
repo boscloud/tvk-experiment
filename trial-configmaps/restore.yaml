@@ -1,0 +1,15 @@
+apiVersion: triliovault.trilio.io/v1
+kind: Restore
+metadata:
+  name: cockroachdb-restore
+spec:
+  backupPlan:
+    name: cockroachdb-backup-plan
+  source:
+    type: Backup
+    backup:
+      name: cockroachdb-full-backup
+    target:
+      name: demo-s3-target
+  restoreNamespace: default
+  skipIfAlreadyExists: true
