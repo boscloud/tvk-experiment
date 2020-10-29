@@ -5,7 +5,7 @@ Prototype Experiment - TrilioVault for Kubernetes - Performance Testing for Opti
 
 based on 'Getting Started' guide - https://docs.trilio.io/kubernetes/use-triliovault/installing-triliovault
 
-## Prequesites
+## Prerequisites
 
 ### Install CSI Driver
 
