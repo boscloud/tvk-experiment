@@ -49,7 +49,7 @@ helm install cockroachdb-app --values setup/cockroachdb-values.yaml stable/cockr
 
 ## Create configmap to inject an executable script into Trial container and map the backup.yaml to the Trial pod
 ```
-kubectl create configmap wrapper --from-file=trial-congimaps/wrapper.sh
+kubectl create configmap wrapper --from-file=trial-configmaps/wrapper.sh
 
 kubectl create configmap backuptrial --from-file=trial-configmaps/backup.yaml
 ```
