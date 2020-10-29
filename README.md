@@ -1,7 +1,7 @@
-# TrilioVault Example - Red Sky Experiment
+# TrilioVault for Kubernetes - Red Sky Experiment
 
 ## Introduction
-Prototype Experiment - TrilioVault for Kubernetes - Performance Testing for Optimal Backup/Restore Duration Time
+This is a simple performance testing and optimization experiment for TrilioVault for Kubernetes.
 
 based on 'Getting Started' guide - https://docs.trilio.io/kubernetes/use-triliovault/installing-triliovault
 
