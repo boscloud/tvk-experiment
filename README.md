@@ -1,4 +1,4 @@
-# TrilioVault for Kubernetes - Red Sky Experiment
+# TrilioVault for Kubernetes - StormForge Experiment
 
 ## Introduction
 This is a simple performance testing and optimization experiment for TrilioVault for Kubernetes.
