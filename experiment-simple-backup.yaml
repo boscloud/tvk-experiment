@@ -1,7 +1,7 @@
 apiVersion: redskyops.dev/v1alpha1
 kind: Experiment
 metadata:
-  name: triliovault-experiment-base
+  name: tvk-experiment-simple-backup
 spec:
   optimization:
   - name: "experimentBudget"
