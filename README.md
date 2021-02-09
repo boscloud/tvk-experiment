@@ -47,7 +47,7 @@ helm install triliovault-operator triliovault-operator/k8s-triliovault-operator 
 ```
 helm repo add stable https://kubernetes-charts.storage.googleapis.com/
 helm repo update
-helm install cockroachdb-app --values setup/cockroachdb-values.yaml stable/cockroachdb
+helm install cockroachdb-app --values cluster-setup/cockroachdb-values.yaml stable/cockroachdb
 ```
 
 ### Create configmap to inject an executable script into Trial container and map the backup.yaml to the Trial pod

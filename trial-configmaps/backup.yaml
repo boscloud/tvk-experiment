@@ -4,6 +4,5 @@ metadata:
   name: cockroachdb-full-backup
 spec:
   type: Full
-  scheduleType: Periodic
   backupPlan:
     name: cockroachdb-backup-plan

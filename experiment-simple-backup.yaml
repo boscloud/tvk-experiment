@@ -1,57 +1,81 @@
-apiVersion: redskyops.dev/v1alpha1
+apiVersion: redskyops.dev/v1beta1
 kind: Experiment
 metadata:
-  name: tvk-experiment-simple-backup
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: tvk-backup
+  namespace: default
 spec:
-  optimization:
-  - name: "experimentBudget"
-    value: "40"
-  parameters:
-  - name: controlplane_cpu
-    min: 1
-    max: 256
-  - name: controlplane_memory
-    min: 1
-    max: 256
   metrics:
-  - name: duration
-    minimize: true
-    query: "{{duration .StartTime .CompletionTime}}"
-  - name: cost
-    minimize: true
-    type: pods
-    # Note that these cost weights are specific to GKE and represent $22/month/cpu and $3/month/GB
-    query: '{{resourceRequests .Pods "cpu=0.022,memory=0.000000000003"}}'
-    selector:
-      matchLabels:
-        app.kubernetes.io/name: k8s-triliovault
-  patches:
-  - targetRef:
-      kind: Deployment
-      apiVersion: apps/v1
-      name: k8s-triliovault-control-plane
-    patch: |
-      spec:
-        template:
-          spec:
-            containers:
-            - name: triliovault-control-plane
-              resources:
-                limits:
-                  cpu: "{{ .Values.controlplane_cpu }}m"
-                  memory: "{{ .Values.controlplane_memory }}Mi"
-                requests:
-                  cpu: "{{ .Values.controlplane_cpu }}m"
-                  memory: "{{ .Values.controlplane_memory }}Mi"                
-  template: # trial
+  - minimize: true
+    name: cost
+    port: 9090
+    query: ({{ cpuRequests . "app.kubernetes.io/part-of=k8s-triliovault" }} * 1) + ({{ memoryRequests . "app.kubernetes.io/part-of=k8s-triliovault" | GB }} * 1)
+    type: prometheus
+  - minimize: true
+    name: cost-cpu-requests
+    optimize: false
+    port: 9090
+    query: '{{ cpuRequests . "app.kubernetes.io/part-of=k8s-triliovault" }}'
+    type: prometheus
+  - minimize: true
+    name: cost-memory-requests
+    optimize: false
+    port: 9090
+    query: '{{ memoryRequests . "app.kubernetes.io/part-of=k8s-triliovault" | GB }}'
+    type: prometheus
+  - minimize: true
+    name: duration
+    port: 0
+    query: '{{ duration .StartTime .CompletionTime }}'
+  parameters:
+  - max: 3
+    min: 1
+    name: replicas
+  - max: 2000
+    min: 10
+    name: metaCpu
+  - max: 10
+    min: 2048
+    name: metaMemory
+  - max: 4092
+    min: 10
+    name: dataMem  
+  - max: 2000
+    min: 10
+    name: dataCpu     
+  trialTemplate:
+    metadata:
+      labels:
+        redskyops.dev/application: tvk-backup
     spec:
-      ttlSecondsAfterFinished: 1800
-      setupServiceAccountName: redsky
-      template: # job
+      setupServiceAccountName: redsky-setup
+      setupTasks:
+      - args:
+        - prometheus
+        - $(MODE)
+        name: monitoring
+      - name: tvk-manager
+        helmChart: k8s-triliovault
+        helmChartVersion: 2.0.1
+        helmRepository: https://github.com/trilioData/k8s-triliovault
+        helmValues:
+        - name: replicaCount
+          value: "{{ .Values.replicas }}"
+        - name: defaultMetaJobLimits.cpu
+          value: "{{ .Values.metaCpu }}m"
+        - name: defaultMetaJobLimits.memory
+          value: "{{ .Values.metaMemory }}Mi"
+        - name: defaultDataJobLimits.cpu
+          value: "{{ .Values.dataCpu }}m"
+        - name: defaultDataJobLimits.memory
+          value: "{{ .Values.dataMemory }}Mi"
+      jobTemplate:
         spec:
-          template: # pod
+          activeDeadlineSeconds: 4800
+          template:
             spec:
-              activeDeadlineSeconds: 1800
+              serviceAccount: redsky-setup
               containers:
               - image: bitnami/kubectl:latest
                 name: kubectl
@@ -73,3 +97,81 @@ spec:
                 - name: backuptrial
                   configMap:
                     name: backuptrial    
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: redsky-setup
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: redsky-prometheus
+rules:
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - get
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  - services
+  - configmaps
+  verbs:
+  - get
+  - create
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - get
+  - create
+  - delete
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - nodes/metrics
+  - nodes/proxy
+  - services
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: redsky-setup-prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: redsky-prometheus
+subjects:
+- kind: ServiceAccount
+  name: redsky-setup
+  namespace: default
