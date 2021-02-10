@@ -29,21 +29,38 @@ spec:
     port: 0
     query: '{{ duration .StartTime .CompletionTime }}'
   parameters:
-  - max: 3
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: cpu
+  - baseline: 1
+    max: 5
     min: 1
     name: replicas
-  - max: 2000
-    min: 10
-    name: metaCpu
-  - max: 10
-    min: 2048
-    name: metaMemory
-  - max: 4092
-    min: 10
-    name: dataMem  
-  - max: 2000
-    min: 10
-    name: dataCpu     
+  patches:
+  - patch: |
+      spec:
+        replicas: {{ .Values.replicas }}
+        template:
+          spec:
+            containers:
+            - name: ingress-controller
+              resources:
+                limits:
+                  memory: '{{ .Values.memory }}M'
+                  cpu: '{{ .Values.cpu }}m'
+                requests:
+                  memory: '{{ .Values.memory }}M'
+                  cpu: '{{ .Values.cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-ingress-controller
+      namespace: default
   trialTemplate:
     metadata:
       labels:
@@ -55,48 +72,6 @@ spec:
         - prometheus
         - $(MODE)
         name: monitoring
-      - name: tvk-manager
-        helmChart: k8s-triliovault
-        helmChartVersion: 2.0.1
-        helmRepository: https://github.com/trilioData/k8s-triliovault
-        helmValues:
-        - name: replicaCount
-          value: "{{ .Values.replicas }}"
-        - name: defaultMetaJobLimits.cpu
-          value: "{{ .Values.metaCpu }}m"
-        - name: defaultMetaJobLimits.memory
-          value: "{{ .Values.metaMemory }}Mi"
-        - name: defaultDataJobLimits.cpu
-          value: "{{ .Values.dataCpu }}m"
-        - name: defaultDataJobLimits.memory
-          value: "{{ .Values.dataMemory }}Mi"
-      jobTemplate:
-        spec:
-          activeDeadlineSeconds: 4800
-          template:
-            spec:
-              serviceAccount: redsky-setup
-              containers:
-              - image: bitnami/kubectl:latest
-                name: kubectl
-                command: ["/scripts/wrapper.sh"]
-                ports:
-                - name: kubectl
-                  containerPort: 2368
-                  protocol: TCP
-                volumeMounts:
-                  - name: wrapper
-                    mountPath: /scripts
-                  - name: backuptrial
-                    mountPath: /manifests
-              volumes:
-                - name: wrapper
-                  configMap:
-                    name: wrapper
-                    defaultMode: 0755
-                - name: backuptrial
-                  configMap:
-                    name: backuptrial    
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -175,3 +150,4 @@ subjects:
 - kind: ServiceAccount
   name: redsky-setup
   namespace: default
+---

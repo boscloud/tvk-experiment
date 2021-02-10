@@ -1,0 +1,17 @@
+# TrilioVault for Kubernetes - StormForge Experiment
+
+## Introduction
+This is a simple performance testing and optimization experiment for TrilioVault for Kubernetes.
+
+based on 'Getting Started' guide - https://docs.trilio.io/kubernetes/use-triliovault/installing-triliovault
+
+### Create configmap to inject an executable script into Trial container and map the backup.yaml to the Trial pod
+```
+kubectl create configmap wrapper --from-file=tvk/wrapper.sh
+
+kubectl create configmap backuptrial --from-file=tvk/backup.yaml
+```
+
+### Run the Experiment File
+
+kubectl apply -f experiment-simple-backup.yaml

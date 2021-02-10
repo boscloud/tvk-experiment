@@ -1,0 +1,308 @@
+apiVersion: redskyops.dev/v1beta1
+kind: Experiment
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: tvk-backup
+  namespace: default
+spec:
+  metrics:
+  - minimize: true
+    name: cost
+    port: 9090
+    query: ({{ cpuRequests . "app.kubernetes.io/part-of=k8s-triliovault" }} * 1) + ({{ memoryRequests . "app.kubernetes.io/part-of=k8s-triliovault" | GB }} * 1)
+    type: prometheus
+  - minimize: true
+    name: cost-cpu-requests
+    optimize: false
+    port: 9090
+    query: '{{ cpuRequests . "app.kubernetes.io/part-of=k8s-triliovault" }}'
+    type: prometheus
+  - minimize: true
+    name: cost-memory-requests
+    optimize: false
+    port: 9090
+    query: '{{ memoryRequests . "app.kubernetes.io/part-of=k8s-triliovault" | GB }}'
+    type: prometheus
+  - minimize: true
+    name: duration
+    port: 0
+    query: '{{ duration .StartTime .CompletionTime }}'
+  parameters:
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: k8s_triliovault_admission_webhook_memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: k8s_triliovault_admission_webhook_cpu
+  - baseline: 1
+    max: 5
+    min: 1
+    name: k8s_triliovault_admission_webhook_replicas
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: k8s_triliovault_backend_memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: k8s_triliovault_backend_cpu
+  - baseline: 1
+    max: 5
+    min: 1
+    name: k8s_triliovault_backend_replicas
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: k8s_triliovault_control_plane_memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: k8s_triliovault_control_plane_cpu
+  - baseline: 1
+    max: 5
+    min: 1
+    name: k8s_triliovault_control_plane_replicas
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: k8s_triliovault_exporter_memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: k8s_triliovault_exporter_cpu
+  - baseline: 1
+    max: 5
+    min: 1
+    name: k8s_triliovault_exporter_replicas
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: k8s_triliovault_ingress_controller_memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: k8s_triliovault_ingress_controller_cpu
+  - baseline: 1
+    max: 5
+    min: 1
+    name: k8s_triliovault_ingress_controller_replicas
+  - baseline: 11
+    max: 4096
+    min: 128
+    name: k8s_triliovault_web_memory
+  - baseline: 10
+    max: 4000
+    min: 100
+    name: k8s_triliovault_web_cpu
+  - baseline: 1
+    max: 5
+    min: 1
+    name: k8s_triliovault_web_replicas
+  patches:
+  - patch: |
+      spec:
+        replicas: {{ .Values.k8s_triliovault_admission_webhook_replicas }}
+        template:
+          spec:
+            containers:
+            - name: triliovault-admission-webhook
+              resources:
+                limits:
+                  memory: '{{ .Values.k8s_triliovault_admission_webhook_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_admission_webhook_cpu }}m'
+                requests:
+                  memory: '{{ .Values.k8s_triliovault_admission_webhook_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_admission_webhook_cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-admission-webhook
+      namespace: default
+  - patch: |
+      spec:
+        replicas: {{ .Values.k8s_triliovault_backend_replicas }}
+        template:
+          spec:
+            containers:
+            - name: triliovault-backend
+              resources:
+                limits:
+                  memory: '{{ .Values.k8s_triliovault_backend_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_backend_cpu }}m'
+                requests:
+                  memory: '{{ .Values.k8s_triliovault_backend_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_backend_cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-backend
+      namespace: default
+  - patch: |
+      spec:
+        replicas: {{ .Values.k8s_triliovault_control_plane_replicas }}
+        template:
+          spec:
+            containers:
+            - name: triliovault-control-plane
+              resources:
+                limits:
+                  memory: '{{ .Values.k8s_triliovault_control_plane_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_control_plane_cpu }}m'
+                requests:
+                  memory: '{{ .Values.k8s_triliovault_control_plane_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_control_plane_cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-control-plane
+      namespace: default
+  - patch: |
+      spec:
+        replicas: {{ .Values.k8s_triliovault_exporter_replicas }}
+        template:
+          spec:
+            containers:
+            - name: triliovault-exporter
+              resources:
+                limits:
+                  memory: '{{ .Values.k8s_triliovault_exporter_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_exporter_cpu }}m'
+                requests:
+                  memory: '{{ .Values.k8s_triliovault_exporter_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_exporter_cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-exporter
+      namespace: default
+  - patch: |
+      spec:
+        replicas: {{ .Values.k8s_triliovault_ingress_controller_replicas }}
+        template:
+          spec:
+            containers:
+            - name: ingress-controller
+              resources:
+                limits:
+                  memory: '{{ .Values.k8s_triliovault_ingress_controller_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_ingress_controller_cpu }}m'
+                requests:
+                  memory: '{{ .Values.k8s_triliovault_ingress_controller_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_ingress_controller_cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-ingress-controller
+      namespace: default
+  - patch: |
+      spec:
+        replicas: {{ .Values.k8s_triliovault_web_replicas }}
+        template:
+          spec:
+            containers:
+            - name: triliovault-web
+              resources:
+                limits:
+                  memory: '{{ .Values.k8s_triliovault_web_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_web_cpu }}m'
+                requests:
+                  memory: '{{ .Values.k8s_triliovault_web_memory }}M'
+                  cpu: '{{ .Values.k8s_triliovault_web_cpu }}m'
+    targetRef:
+      apiVersion: apps/v1
+      kind: Deployment
+      name: k8s-triliovault-web
+      namespace: default
+  trialTemplate:
+    metadata:
+      labels:
+        redskyops.dev/application: tvk-backup
+    spec:
+      setupServiceAccountName: redsky-setup
+      setupTasks:
+      - args:
+        - prometheus
+        - $(MODE)
+        name: monitoring
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: redsky-setup
+  namespace: default
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: redsky-prometheus
+rules:
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterroles
+  - clusterrolebindings
+  verbs:
+  - get
+  - create
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  - services
+  - configmaps
+  verbs:
+  - get
+  - create
+  - delete
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - get
+  - create
+  - delete
+  - list
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  - nodes/metrics
+  - nodes/proxy
+  - services
+  verbs:
+  - list
+  - watch
+  - get
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    redskyops.dev/application: tvk-backup
+  name: redsky-setup-prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: redsky-prometheus
+subjects:
+- kind: ServiceAccount
+  name: redsky-setup
+  namespace: default
+---

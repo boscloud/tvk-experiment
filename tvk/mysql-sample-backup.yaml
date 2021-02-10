@@ -1,8 +1,9 @@
 apiVersion: triliovault.trilio.io/v1
 kind: Backup
 metadata:
-  name: cockroachdb-full-backup
+  name: mysql-label-backup
 spec:
   type: Full
   backupPlan:
-    name: cockroachdb-backup-plan
+    name: mysql-label-backupplan
+    namespace: default
