@@ -7,11 +7,14 @@ based on 'Getting Started' guide - https://docs.trilio.io/kubernetes/use-triliov
 
 ### Create configmap to inject an executable script into Trial container and map the backup.yaml to the Trial pod
 ```
-kubectl create configmap wrapper --from-file=tvk/wrapper.sh
+kubectl create configmap bashscript --from-file=tvk/bash-script.sh
 
-kubectl create configmap backuptrial --from-file=tvk/backup.yaml
+kubectl create configmap backup --from-file=tvk/mysql-sample-backup.yaml
+
+kubectl create configmap tvkmanager --from-file=tvk/tvk-manager.yaml 
+
 ```
 
 ### Run the Experiment File
 
-kubectl apply -f experiment-simple-backup.yaml
+kubectl apply -f helm-experiment.yaml

@@ -1,0 +1,20 @@
+apiVersion: triliovault.trilio.io/v1
+kind: TrilioVaultManager
+metadata:
+  labels:
+    triliovault: k8s
+spec:
+  trilioVaultAppVersion: latest
+  helmVersion:
+    version: v3
+  applicationScope: Namespaced
+  restoreNamespaces: ["kube-system", "default"]
+  metadataJobLimits:
+    cpu: 500m
+    memory: 512Mi
+  dataJobLimits:
+    cpu: 1200m
+    memory: 1536Mi
+  deploymentLimits:
+    cpu: 250m
+    memory: 512Mi

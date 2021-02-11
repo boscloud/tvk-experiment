@@ -1,10 +1,6 @@
 #!/bin/bash
 set -ex
 
-kubectl apply -f /backupplan/mysql-sample-backupplan.yaml
-
-sleep 10
-
 kubectl delete -f /backup/mysql-sample-backup.yaml || :
 
 kubectl apply -f /backup/mysql-sample-backup.yaml
