@@ -3,6 +3,8 @@ kind: TrilioVaultManager
 metadata:
   labels:
     triliovault: k8s
+  name: triliovault-manager
+  namespace: default  
 spec:
   trilioVaultAppVersion: latest
   helmVersion:
