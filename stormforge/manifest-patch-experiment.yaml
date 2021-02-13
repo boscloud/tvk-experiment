@@ -400,7 +400,7 @@ kind: ClusterRole
 metadata:
   labels:
     redskyops.dev/application: tvk-backup
-  name: redsky-prometheus
+  name: redsky-prometheus-a713e1
 rules:
 - apiGroups:
   - rbac.authorization.k8s.io
@@ -455,11 +455,11 @@ kind: ClusterRoleBinding
 metadata:
   labels:
     redskyops.dev/application: tvk-backup
-  name: redsky-setup-prometheus
+  name: redsky-setup-prometheus-a713e1
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: redsky-prometheus
+  name: redsky-prometheus-a713e1
 subjects:
 - kind: ServiceAccount
   name: redsky-setup
