@@ -20,7 +20,7 @@ metadata:
     app: k8s-demo-app
     tier: mysql
 spec:
-  storageClassName: "csi-hostpath-sc"
+  storageClassName: "ebs-sc"
   accessModes:
     - ReadWriteOnce
   resources:
