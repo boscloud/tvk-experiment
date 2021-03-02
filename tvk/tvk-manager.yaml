@@ -9,7 +9,7 @@ spec:
   trilioVaultAppVersion: latest
   helmVersion:
     version: v3
-  applicationScope: Namespaced
+  applicationScope: Cluster
   restoreNamespaces: ["kube-system", "default"]
   metadataJobLimits:
     cpu: 500m
